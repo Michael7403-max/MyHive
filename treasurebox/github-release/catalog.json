@@ -1,9 +1,65 @@
 [
   {
+    "id": "meeting-notes",
+    "name": "会议纪要大师",
+    "slogan": "开会你说我来记",
+    "description": "录音转文字并自动整理会议纪要。",
+    "tags": ["语音转写", "会议纪要", "自动整理"],
+    "category": "general",
+    "releaseAssetPrefix": "meeting-notes-",
+    "status": "planned"
+  },
+  {
+    "id": "ppt-master",
+    "name": "PPT大师",
+    "slogan": "汇报好看我来做",
+    "description": "根据资料生成和美化演示文稿。",
+    "tags": ["PPT生成", "排版美化", "AI辅助"],
+    "category": "general",
+    "releaseAssetPrefix": "ppt-master-",
+    "status": "planned"
+  },
+  {
+    "id": "md-master",
+    "name": "Markdown大师",
+    "slogan": "文件转 Markdown",
+    "description": "将 Word、PDF、网页和文本等文件转换为 Markdown。",
+    "tags": ["文件转MD", "格式转换", "文档整理"],
+    "category": "general",
+    "releaseAssetPrefix": "md-master-",
+    "status": "planned"
+  },
+  {
     "id": "video-master",
     "name": "短视频大师",
+    "slogan": "剪辑生成一键搞定",
     "description": "根据主题和文案生成短视频。",
+    "tags": ["视频剪辑", "AI生成", "素材处理"],
+    "category": "special",
+    "version": "0.1.0",
+    "publishedAt": "2026-08-05T02:59:00.0956923Z",
     "releaseAssetPrefix": "video-master-",
+    "downloadUrl": "https://github.com/Michael7403-max/MyHive/releases/download/tools-v0.1.0/video-master-0.1.0.zip",
     "status": "released"
+  },
+  {
+    "id": "english-master",
+    "name": "英语学习大师",
+    "slogan": "让英语学习更高效",
+    "description": "单词、听力、口语和阅读的智能学习助手。",
+    "tags": ["单词学习", "口语练习", "学习计划"],
+    "category": "special",
+    "releaseAssetPrefix": "english-master-",
+    "status": "planned"
+  },
+  {
+    "id": "stock-master",
+    "name": "股票大师",
+    "slogan": "洞察市场辅助决策",
+    "description": "股票资讯整理、行情分析和投资研究辅助。",
+    "tags": ["行情分析", "资讯整理", "投资研究"],
+    "category": "special",
+    "releaseAssetPrefix": "stock-master-",
+    "status": "planned"
   }
 ]
