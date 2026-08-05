@@ -1,0 +1,26 @@
+{
+  "id": "video-master",
+  "name": "短视频大师",
+  "version": "0.1.0",
+  "icon": "🎬",
+  "category": "general",
+  "description": "输入主题/文案 → AI 生成文案+关键词 → 配音+字幕+素材 → 自动剪辑成片",
+  "type": "service",
+  "entry": "web/index.html",
+  "service": {
+    "command": "python",
+    "executable": "VideoMaster.exe",
+    "dev_command": "python",
+    "args": ["server.py", "--port", "{port}"],
+    "port": "auto",
+    "healthCheck": "/health",
+    "startTimeout": 15
+  },
+  "data": {
+    "persistent": true,
+    "maxSize": "5GB"
+  },
+  "auth": {
+    "shared": true
+  }
+}
