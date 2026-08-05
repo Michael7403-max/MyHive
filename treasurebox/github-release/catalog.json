@@ -1,0 +1,9 @@
+[
+  {
+    "id": "video-master",
+    "name": "短视频大师",
+    "description": "根据主题和文案生成短视频。",
+    "releaseAssetPrefix": "video-master-",
+    "status": "released"
+  }
+]
