@@ -1,4 +1,4 @@
-## MyHive Desktop 0.1.1
+## MyHive Desktop
 
 MyHive 是面向个人用户的 Agent 工作台，支持：
 
