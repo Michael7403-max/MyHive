@@ -1,0 +1,98 @@
+name: Build and publish MyHive tools
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tool release version, for example 0.1.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  package-tools:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        shell: pwsh
+        run: python -m pip install --upgrade pip pyinstaller
+
+      - name: Build tool packages
+        shell: pwsh
+        env:
+          TOOL_VERSION: ${{ inputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $out = Join-Path $env:GITHUB_WORKSPACE 'treasurebox/github-release'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+
+          $tools = @(
+            @{ Id = 'video-master'; Source = 'treasurebox/VideoMaster'; Exe = 'VideoMaster'; Requirements = 'treasurebox/VideoMaster/requirements.txt' }
+          )
+
+          foreach ($tool in $tools) {
+            $source = Join-Path $env:GITHUB_WORKSPACE $tool.Source
+            $stage = Join-Path $out $tool.Id
+            New-Item -ItemType Directory -Force -Path $stage | Out-Null
+
+            if (Test-Path $tool.Requirements) {
+              python -m pip install -r $tool.Requirements
+            }
+
+            Push-Location $source
+            try {
+              python -m PyInstaller --noconfirm --clean --onedir --name $tool.Exe server.py
+            } finally {
+              Pop-Location
+            }
+
+            # 保留 manifest、服务代码和静态资源；运行时优先使用 exe，
+            # 仍保留 command=python 作为本地开发回退。
+            robocopy $source $stage /E /XD __pycache__ .pytest_cache data\storage error dist build /XF *.pyc *.log | Out-Null
+            if ($LASTEXITCODE -gt 7) { throw "robocopy failed: $($LASTEXITCODE)" }
+            Copy-Item (Join-Path $source "dist\$($tool.Exe)\$($tool.Exe).exe") (Join-Path $stage "$($tool.Exe).exe") -Force
+
+            $manifestPath = Join-Path $stage 'manifest.json'
+            $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+            $manifest.version = $env:TOOL_VERSION
+            $manifest.service.executable = "$($tool.Exe).exe"
+            $manifest | ConvertTo-Json -Depth 20 | Set-Content $manifestPath -Encoding UTF8
+
+            Compress-Archive -Path (Join-Path $stage '*') -DestinationPath (Join-Path $out "$($tool.Id)-$($env:TOOL_VERSION).zip") -Force
+          }
+
+          $catalogPath = Join-Path $env:GITHUB_WORKSPACE 'treasurebox/github-release/catalog.json'
+          $catalog = Get-Content $catalogPath -Raw | ConvertFrom-Json
+          $publishedAt = (Get-Date).ToUniversalTime().ToString('o')
+          foreach ($entry in $catalog) {
+            $asset = "$($entry.id)-$($env:TOOL_VERSION).zip"
+            $entry.version = $env:TOOL_VERSION
+            $entry.publishedAt = $publishedAt
+            $entry.downloadUrl = "https://github.com/${{ github.repository }}/releases/download/v$($env:TOOL_VERSION)/$asset"
+          }
+          $catalog | ConvertTo-Json -Depth 10 | Set-Content $catalogPath -Encoding UTF8
+
+          Get-ChildItem $out -Filter '*.zip' | Get-FileHash -Algorithm SHA256 | ForEach-Object {
+            "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)"
+          } | Set-Content (Join-Path $out 'SHA256SUMS.txt') -Encoding ASCII
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: MyHive Tools ${{ inputs.version }}
+          generate_release_notes: true
+          files: |
+            treasurebox/github-release/*.zip
+            treasurebox/github-release/SHA256SUMS.txt
+            treasurebox/github-release/catalog.json
